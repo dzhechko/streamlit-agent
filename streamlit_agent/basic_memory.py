@@ -1,7 +1,7 @@
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_openai import ChatOpenAI
+from langchain_community.chat_models import ChatYandexGPT
 
 import streamlit as st
 
@@ -9,29 +9,42 @@ st.set_page_config(page_title="StreamlitChatMessageHistory", page_icon="📖")
 st.title("📖 StreamlitChatMessageHistory")
 
 """
-A basic example of using StreamlitChatMessageHistory to help LLMChain remember messages in a conversation.
-The messages are stored in Session State across re-runs automatically. You can view the contents of Session State
-in the expander below. View the
-[source code for this app](https://github.com/langchain-ai/streamlit-agent/blob/main/streamlit_agent/basic_memory.py).
+Простой пример использования StreamlitChatMessageHistory, чтобы помочь LLMChain запоминать сообщения в диалоге. 
+Пример адаптирован для использования с YandexGPT
+Сообщения сохраняются в состоянии сессии при автоматическом повторном запуске. Вы можете просмотреть содержимое состояния сессии
+ниже. [Исходный код приложения ](https://github.com/langchain-ai/streamlit-agent/blob/main/streamlit_agent/basic_memory.py).
 """
 
-# Set up memory
+# Настраиваем алгоритмы работы памяти
 msgs = StreamlitChatMessageHistory(key="langchain_messages")
 if len(msgs.messages) == 0:
-    msgs.add_ai_message("How can I help you?")
+    msgs.add_ai_message("Как я могу вам помочь?")
 
-view_messages = st.expander("View the message contents in session state")
+view_messages = st.expander("Просмотр сообщения в состоянии сессии")
 
-# Get an OpenAI API Key before continuing
-if "openai_api_key" in st.secrets:
-    openai_api_key = st.secrets.openai_api_key
+# folder_id = st.secrets["yagpt_folder_id"]
+# api_id = st.secrets["yagpt_api_id"]
+# api_key = st.secrets["yagpt_api_key"]
+
+# Получение folder id
+if "yagpt_folder_id" in st.secrets:
+    yagpt_folder_id = st.secrets.yagpt_folder_id
 else:
-    openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")
-if not openai_api_key:
-    st.info("Enter an OpenAI API Key to continue")
+    yagpt_folder_id = st.sidebar.text_input("YaGPT folder ID", type="password")
+if not yagpt_folder_id:
+    st.info("Введите YaGPT folder ID для продолжения")
     st.stop()
 
-# Set up the LangChain, passing in Message History
+# Получение ключа YaGPT API
+if "yagpt_api_key" in st.secrets:
+    yagpt_api_key = st.secrets.yagpt_api_key
+else:
+    yagpt_api_key = st.sidebar.text_input("YaGPT API Key", type="password")
+if not yagpt_api_key:
+    st.info("Введите YaGPT API ключ для продолжения")
+    st.stop()
+
+# Настраиваем LangChain, передавая Message History
 
 prompt = ChatPromptTemplate.from_messages(
     [
@@ -41,7 +54,11 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-chain = prompt | ChatOpenAI(api_key=openai_api_key)
+# model_uri = "gpt://"+str(yagpt_folder_id)+"/yandexgpt/latest"
+model_uri = "gpt://"+str(yagpt_folder_id)+"/yandexgpt-lite/latest"
+model = ChatYandexGPT(api_key=yagpt_api_key, model_uri=model_uri, temperature = 0.6)
+
+chain = prompt | model
 chain_with_history = RunnableWithMessageHistory(
     chain,
     lambda session_id: msgs,
@@ -49,26 +66,26 @@ chain_with_history = RunnableWithMessageHistory(
     history_messages_key="history",
 )
 
-# Render current messages from StreamlitChatMessageHistory
+# Отображать текущие сообщения из StreamlitChatMessageHistory
 for msg in msgs.messages:
     st.chat_message(msg.type).write(msg.content)
 
-# If user inputs a new prompt, generate and draw a new response
+# Если пользователь вводит новое приглашение, сгенерировать и отобразить новый ответ
 if prompt := st.chat_input():
     st.chat_message("human").write(prompt)
-    # Note: new messages are saved to history automatically by Langchain during run
+    # Примечание: новые сообщения автоматически сохраняются в историю по длинной цепочке во время запуска
     config = {"configurable": {"session_id": "any"}}
     response = chain_with_history.invoke({"question": prompt}, config)
     st.chat_message("ai").write(response.content)
 
-# Draw the messages at the end, so newly generated ones show up immediately
+# Отобразить сообщения в конце, чтобы вновь сгенерированные отображались сразу
 with view_messages:
     """
-    Message History initialized with:
+    История сообщений, инициализированная с помощью:
     ```python
     msgs = StreamlitChatMessageHistory(key="langchain_messages")
     ```
 
-    Contents of `st.session_state.langchain_messages`:
+    Содержание `st.session_state.langchain_messages`:
     """
     view_messages.json(st.session_state.langchain_messages)
