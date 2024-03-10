@@ -54,8 +54,8 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-# model_uri = "gpt://"+str(yagpt_folder_id)+"/yandexgpt/latest"
-model_uri = "gpt://"+str(yagpt_folder_id)+"/yandexgpt-lite/latest"
+model_uri = "gpt://"+str(yagpt_folder_id)+"/yandexgpt/latest"
+# model_uri = "gpt://"+str(yagpt_folder_id)+"/yandexgpt-lite/latest"
 model = ChatYandexGPT(api_key=yagpt_api_key, model_uri=model_uri, temperature = 0.6)
 
 chain = prompt | model
