@@ -48,10 +48,9 @@ if not yagpt_api_key:
 # st.info(yagpt_folder_id)
 
 # Настраиваем LangChain, передавая Message History
-
 prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", "You are an AI chatbot having a conversation with a human."),
+        ("system", "Ты очень полезный чат-бот. При ответе на вопросы будет краток, используй 30 слов или меньше."),
         MessagesPlaceholder(variable_name="history"),
         ("human", "{question}"),
     ]
