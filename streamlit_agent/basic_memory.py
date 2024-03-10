@@ -69,8 +69,8 @@ chain_with_history = RunnableWithMessageHistory(
 )
 
 # Отображать текущие сообщения из StreamlitChatMessageHistory
-# for msg in msgs.messages:
-#     st.chat_message(msg.type).write(msg.content)
+for msg in msgs.messages:
+    st.chat_message(msg.type).write(msg.content)
 
 # Если пользователь вводит новое приглашение, сгенерировать и отобразить новый ответ
 if prompt := st.chat_input():
