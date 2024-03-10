@@ -43,7 +43,8 @@ else:
 if not yagpt_api_key:
     st.info("Введите YaGPT API ключ для продолжения")
     st.stop()
-
+    
+st.info(yagpt_api_key)
 # Настраиваем LangChain, передавая Message History
 
 prompt = ChatPromptTemplate.from_messages(
