@@ -27,17 +27,17 @@ view_messages = st.expander("Просмотр сообщения в состоя
 # api_key = st.secrets["yagpt_api_key"]
 
 # Получение folder id
-if "yagpt_folder_id" in st.secrets:
-    yagpt_folder_id = st.secrets.yagpt_folder_id
+if "YC_FOLDER_ID" in st.secrets:
+    yagpt_folder_id = st.secrets.YC_FOLDER_ID
 else:
-    yagpt_folder_id = st.sidebar.text_input("YaGPT folder ID", type="password")
+    yagpt_folder_id = st.sidebar.text_input("YC folder ID", type="password")
 if not yagpt_folder_id:
     st.info("Введите YaGPT folder ID для продолжения")
     st.stop()
 
 # Получение ключа YaGPT API
-if "yagpt_api_key" in st.secrets:
-    yagpt_api_key = st.secrets.yagpt_api_key
+if "YC_API_KEY" in st.secrets:
+    yagpt_api_key = st.secrets.YC_API_KEY
 else:
     yagpt_api_key = st.sidebar.text_input("YaGPT API Key", type="password")
 if not yagpt_api_key:
