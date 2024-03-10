@@ -45,7 +45,7 @@ if not yagpt_api_key:
     st.stop()
     
 # st.info(yagpt_api_key)
-st.info(yagpt_folder_id)
+# st.info(yagpt_folder_id)
 
 # Настраиваем LangChain, передавая Message History
 
